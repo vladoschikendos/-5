@@ -1,271 +1,303 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
 namespace Vladmainproject
 {
+    class Student
+    {
+        public string Surname;
+        public string Name;
+        public int BirthYear;
+        public string Exam;
+        public int Points;
+
+        public override string ToString()
+        {
+            return $"{Surname} {Name}, {BirthYear} г.р., экзамен: {Exam}, баллы: {Points}";
+        }
+    }
+
+    class Grandma
+    {
+        public string Name;
+        public int Age;
+        public List<string> Diseases = new List<string>();
+
+        public override string ToString()
+        {
+            string d = Diseases.Count == 0 ? "нет болезней" : string.Join(", ", Diseases);
+            return $"{Name}, {Age} лет, болезни: [{d}]";
+        }
+    }
+
+    class Hospital
+    {
+        public string Name;
+        public List<string> Cures = new List<string>();
+        public int Capacity;
+        public List<Grandma> Patients = new List<Grandma>();
+
+        public override string ToString()
+        {
+            string cures = string.Join(", ", Cures);
+            double percent = Capacity == 0 ? 0 : (double)Patients.Count / Capacity * 100;
+            return $"{Name} | лечит: [{cures}] | пациентов: {Patients.Count}/{Capacity} ({percent:F1}%)";
+        }
+    }
+
     internal class Program
     {
-
-        static (int glas, int coglas) CountLetters(char[] chars)
+        static void Task1()
         {
-            string glas = "аеёиоуыэюяaeiouyАЕЁИОУЫЭЮЯAEIOUY";
-            string coglas = "бвгджзйклмнпрстфхцчшщbcdfghjklmnpqrstvwxzБВГДЖЗЙКЛМНПРСТФХЦЧШЩBCDFGHJKLMNPQRSTVWXZ";
-            int v = 0, c = 0;
-            foreach (char ch in chars)
+            Console.WriteLine("\n===== ПУНКТ 1: Картинки =====");
+
+            List<int> pictures = new List<int>();
+            for (int i = 1; i <= 32; i++)
             {
-                if (glas.IndexOf(ch) >= 0) v++;
-                else if (coglas.IndexOf(ch) >= 0) c++;
+                pictures.Add(i);
+                pictures.Add(i);
             }
-            return (v, c);
+
+            Console.WriteLine("Изначальный List:");
+            Console.WriteLine(string.Join(" ", pictures));
+
+            Random rnd = new Random();
+            for (int i = pictures.Count - 1; i > 0; i--)
+            {
+                int j = rnd.Next(i + 1);
+                int tmp = pictures[i];
+                pictures[i] = pictures[j];
+                pictures[j] = tmp;
+            }
+
+            Console.WriteLine("\nПеремешанный List:");
+            Console.WriteLine(string.Join(" ", pictures));
         }
 
-
-        static (int glas, int coglas) CountLettersList(List<char> chars)
+        static void Task2()
         {
-            string glas = "аеёиоуыэюяaeiouyАЕЁИОУЫЭЮЯAEIOUY";
-            string coglas = "бвгджзйклмнпрстфхцчшщbcdfghjklmnpqrstvwxzБВГДЖЗЙКЛМНПРСТФХЦЧШЩBCDFGHJKLMNPQRSTVWXZ";
-            int v = 0, c = 0;
-            foreach (char ch in chars)
+            Console.WriteLine("\n===== ПУНКТ 2: Студенты =====");
+
+            string filePath = "students.txt";
+            if (!File.Exists(filePath))
             {
-                if (glas.IndexOf(ch) >= 0) v++;
-                else if (coglas.IndexOf(ch) >= 0) c++;
-            }
-            return (v, c);
-        }
-
-
-        static void PrintMatrix(int[,] m)
-        {
-            for (int i = 0; i < m.GetLength(0); i++)
-            {
-                for (int j = 0; j < m.GetLength(1); j++)
-                    Console.Write(m[i, j] + " ");
-                Console.WriteLine();
-            }
-        }
-
-        static int[,] MultiplyMatrix(int[,] a, int[,] b)
-        {
-            int n = a.GetLength(0), m = a.GetLength(1), p = b.GetLength(1);
-            if (m != b.GetLength(0))
-                throw new ArgumentException("Несовместимые размеры матриц");
-
-            int[,] result = new int[n, p];
-            for (int i = 0; i < n; i++)
-                for (int j = 0; j < p; j++)
+                string[] defaultStudents =
                 {
-                    int sum = 0;
-                    for (int k = 0; k < m; k++)
-                        sum += a[i, k] * b[k, j];
-                    result[i, j] = sum;
-                }
-            return result;
-        }
-
-
-        static void PrintMatrixLinked(LinkedList<LinkedList<int>> m)
-        {
-            foreach (var row in m)
-            {
-                foreach (var x in row)
-                    Console.Write(x + " ");
-                Console.WriteLine();
+                    "Иванов Иван 2005 Математика 85",
+                    "Петров Пётр 2004 Физика 72",
+                    "Сидоров Сидор 2005 Информатика 90",
+                    "Кузнецова Анна 2004 Химия 78",
+                    "Смирнов Алексей 2005 Биология 65",
+                    "Попова Мария 2004 Литература 88",
+                    "Васильев Дмитрий 2005 История 74",
+                    "Новикова Елена 2004 География 81",
+                    "Морозов Сергей 2005 Английский 95",
+                    "Фёдорова Ольга 2004 Обществознание 70"
+                };
+                File.WriteAllLines(filePath, defaultStudents);
+                Console.WriteLine($"Создан файл {filePath} с 10 студентами.");
             }
-        }
 
-        static LinkedList<LinkedList<int>> MultiplyMatrixLinked(LinkedList<LinkedList<int>> a, LinkedList<LinkedList<int>> b)
-        {
-
-            var A = new List<List<int>>();
-            foreach (var row in a) A.Add(new List<int>(row));
-
-            var B = new List<List<int>>();
-            foreach (var row in b) B.Add(new List<int>(row));
-
-            int n = A.Count, m = A[0].Count, p = B[0].Count;
-            if (m != B.Count)
-                throw new ArgumentException("Несовместимые размеры матриц");
-
-            var result = new LinkedList<LinkedList<int>>();
-            for (int i = 0; i < n; i++)
+            Dictionary<string, Student> students = new Dictionary<string, Student>();
+            foreach (string line in File.ReadAllLines(filePath))
             {
-                var newRow = new LinkedList<int>();
-                for (int j = 0; j < p; j++)
+                string[] p = line.Split(' ');
+                if (p.Length >= 5)
                 {
-                    int sum = 0;
-                    for (int k = 0; k < m; k++)
-                        sum += A[i][k] * B[k][j];
-                    newRow.AddLast(sum);
+                    Student s = new Student
+                    {
+                        Surname = p[0],
+                        Name = p[1],
+                        BirthYear = int.Parse(p[2]),
+                        Exam = p[3],
+                        Points = int.Parse(p[4])
+                    };
+                    students[s.Surname + " " + s.Name] = s;
                 }
-                result.AddLast(newRow);
             }
-            return result;
-        }
 
-        static LinkedList<LinkedList<int>> MakeLinkedMatrix(params int[][] rows)
-        {
-            var m = new LinkedList<LinkedList<int>>();
-            foreach (var r in rows)
+            Console.WriteLine("Загружено студентов: " + students.Count);
+
+            while (true)
             {
-                var row = new LinkedList<int>();
-                foreach (var x in r) row.AddLast(x);
-                m.AddLast(row);
+                Console.WriteLine("\nМеню:");
+                Console.WriteLine("  Новый студент  — добавить");
+                Console.WriteLine("  Удалить        — удалить по Фамилии Имени");
+                Console.WriteLine("  Сортировать    — сортировка по баллам");
+                Console.WriteLine("  Показать       — вывести всех");
+                Console.WriteLine("  Выход          — выйти из меню");
+                Console.Write("Введите команду: ");
+                string cmd = Console.ReadLine();
+
+                if (cmd == "Выход") break;
+
+                if (cmd == "Новый студент")
+                {
+                    Console.Write("Фамилия: "); string sur = Console.ReadLine();
+                    Console.Write("Имя: "); string nm = Console.ReadLine();
+                    Console.Write("Год рождения: "); int yr = int.Parse(Console.ReadLine());
+                    Console.Write("Экзамен: "); string ex = Console.ReadLine();
+                    Console.Write("Баллы: "); int pts = int.Parse(Console.ReadLine());
+
+                    Student s = new Student { Surname = sur, Name = nm, BirthYear = yr, Exam = ex, Points = pts };
+                    students[sur + " " + nm] = s;
+                    Console.WriteLine("Студент добавлен.");
+                }
+                else if (cmd == "Удалить")
+                {
+                    Console.Write("Фамилия Имя для удаления: ");
+                    string key = Console.ReadLine();
+                    if (students.Remove(key))
+                        Console.WriteLine("Удалён.");
+                    else
+                        Console.WriteLine("Не найден.");
+                }
+                else if (cmd == "Сортировать")
+                {
+                    var sorted = students.Values.OrderBy(s => s.Points).ToList();
+                    Console.WriteLine("Отсортировано по баллам (возрастание):");
+                    foreach (var s in sorted)
+                        Console.WriteLine("  " + s);
+                }
+                else if (cmd == "Показать")
+                {
+                    foreach (var s in students.Values)
+                        Console.WriteLine("  " + s);
+                }
             }
-            return m;
         }
 
-
-        static double[] AverageByMonth(int[,] temperature)
+        static void Task3()
         {
-            int months = temperature.GetLength(0);
-            int days = temperature.GetLength(1);
-            double[] avg = new double[months];
+            Console.WriteLine("\n===== ПУНКТ 3: Бабули и Больницы =====");
 
-            for (int m = 0; m < months; m++)
+            Stack<Hospital> hospitals = new Stack<Hospital>();
+
+            Hospital h1 = new Hospital { Name = "Городская", Capacity = 2 };
+            h1.Cures.Add("Грипп"); h1.Cures.Add("Кашель"); h1.Cures.Add("Простуда");
+
+            Hospital h2 = new Hospital { Name = "Областная", Capacity = 1 };
+            h2.Cures.Add("Давление"); h2.Cures.Add("Сердце");
+
+            Hospital h3 = new Hospital { Name = "Частная", Capacity = 3 };
+            h3.Cures.Add("Аллергия"); h3.Cures.Add("Грипп"); h3.Cures.Add("Давление");
+
+            hospitals.Push(h1);
+            hospitals.Push(h2);
+            hospitals.Push(h3);
+
+            Queue<Grandma> grandmas = new Queue<Grandma>();
+
+            Console.WriteLine("Введите бабуль. Для завершения введите пустое имя.");
+            while (true)
             {
-                int sum = 0;
-                for (int d = 0; d < days; d++)
-                    sum += temperature[m, d];
-                avg[m] = (double)sum / days;
+                Console.Write("Имя бабули (Enter — закончить): ");
+                string name = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(name)) break;
+
+                Console.Write("Возраст: ");
+                int age = int.Parse(Console.ReadLine());
+
+                Grandma g = new Grandma { Name = name, Age = age };
+
+                Console.Write("Болезни через запятую (Enter — нет болезней): ");
+                string dis = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(dis))
+                {
+                    foreach (string d in dis.Split(','))
+                        g.Diseases.Add(d.Trim());
+                }
+                grandmas.Enqueue(g);
             }
-            return avg;
+
+            if (grandmas.Count == 0)
+            {
+                Console.WriteLine("Добавлю тестовых бабуль для демонстрации.");
+                var g1 = new Grandma { Name = "Баба Нюра", Age = 78 };
+                g1.Diseases.Add("Грипп"); g1.Diseases.Add("Давление");
+                grandmas.Enqueue(g1);
+
+                var g2 = new Grandma { Name = "Баба Зина", Age = 85 };
+                g2.Diseases.Add("Аллергия");
+                grandmas.Enqueue(g2);
+
+                var g3 = new Grandma { Name = "Баба Валя", Age = 70 };
+                grandmas.Enqueue(g3);
+
+                var g4 = new Grandma { Name = "Баба Катя", Age = 90 };
+                g4.Diseases.Add("Рак"); g4.Diseases.Add("Диабет");
+                grandmas.Enqueue(g4);
+            }
+
+            Console.WriteLine("\n--- Распределение бабуль по больницам ---");
+
+            while (grandmas.Count > 0)
+            {
+                Grandma g = grandmas.Dequeue();
+                bool placed = false;
+
+                Console.WriteLine($"\nПришла: {g}");
+
+                if (g.Diseases.Count == 0)
+                {
+                    foreach (Hospital h in hospitals)
+                    {
+                        if (h.Patients.Count < h.Capacity)
+                        {
+                            h.Patients.Add(g);
+                            Console.WriteLine($"  → в {h.Name} (просто спросить)");
+                            placed = true;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (Hospital h in hospitals)
+                    {
+                        if (h.Patients.Count >= h.Capacity) continue;
+
+                        int matches = 0;
+                        foreach (string d in g.Diseases)
+                            if (h.Cures.Contains(d)) matches++;
+
+                        double percent = (double)matches / g.Diseases.Count * 100;
+                        if (percent > 50)
+                        {
+                            h.Patients.Add(g);
+                            Console.WriteLine($"  → в {h.Name} (лечит {percent:F0}% болезней)");
+                            placed = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!placed)
+                    Console.WriteLine("  ✗ осталась на улице плакать");
+            }
+
+            Console.WriteLine("\n--- Все бабули в больницах ---");
+            foreach (Hospital h in hospitals)
+                foreach (Grandma g in h.Patients)
+                    Console.WriteLine("  " + g);
+
+            Console.WriteLine("\n--- Все больницы ---");
+            foreach (Hospital h in hospitals)
+                Console.WriteLine("  " + h);
         }
 
 
-        static Dictionary<string, double> AverageByMonthDict(Dictionary<string, int[]> temps)
-        {
-            var result = new Dictionary<string, double>();
-            foreach (var kv in temps)
-            {
-                int sum = 0;
-                foreach (int t in kv.Value) sum += t;
-                result[kv.Key] = (double)sum / kv.Value.Length;
-            }
-            return result;
-        }
 
         static void Main(string[] args)
         {
+            Task1();
+            Task2();
+            Task3();
 
-            Console.WriteLine("6.1");
-
-            string fullPath = @"D:\Влад\Downloads\дз5 текст для 6.1.txt";
-
-            if (!File.Exists(fullPath))
-            {
-                Console.WriteLine($"Файл не найден: {fullPath}");
-            }
-            else
-            {
-                char[] chars = File.ReadAllText(fullPath).ToCharArray();
-                var (glas, coglas) = CountLetters(chars);
-                Console.WriteLine($"Файл: {fullPath}");
-                Console.WriteLine($"Гласных букв: {glas}");
-                Console.WriteLine($"Согласных букв: {coglas}");
-            }
-            Console.WriteLine();
-
-
-            Console.WriteLine("6.2");
-
-            int[,] ma = { { 1, 2 }, { 3, 4 } };
-            int[,] mb = { { 5, 6 }, { 7, 8 } };
-
-            Console.WriteLine("Вывод матрицы А");
-            PrintMatrix(ma);
-            Console.WriteLine("Вывод матрицы Б");
-            PrintMatrix(mb);
-
-            int[,] mc = MultiplyMatrix(ma, mb);
-            Console.WriteLine("Результат умножения матриц:");
-            PrintMatrix(mc);
-            Console.WriteLine();
-
-
-            Console.WriteLine("6.3");
-
-            Random rnd = new Random();
-            int[,] temperature = new int[12, 30];
-            for (int m = 0; m < 12; m++)
-                for (int d = 0; d < 30; d++)
-                    temperature[m, d] = rnd.Next(-20, 31);
-
-            double[] avg = AverageByMonth(temperature);
-            Console.WriteLine("Средние температуры по месяцам:");
-            for (int m = 0; m < 12; m++)
-                Console.WriteLine($"Месяц {m + 1}: {avg[m]:F2}");
-
-            Array.Sort(avg);
-            Console.WriteLine("\nОтсортированные средние температуры:");
-            foreach (double t in avg)
-                Console.Write($"{t:F2}  ");
-            Console.WriteLine();
-            Console.WriteLine();
-
-
-            Console.WriteLine("ДОМАШНЕЕ ЗАДАНИЕ 6.1 (List<T>)");
-
-            if (File.Exists(fullPath))
-            {
-
-                List<char> charsList = new List<char>(File.ReadAllText(fullPath));
-                var (g, c) = CountLettersList(charsList);
-                Console.WriteLine($"Файл: {fullPath}");
-                Console.WriteLine($"Гласных букв: {g}");
-                Console.WriteLine($"Согласных букв: {c}");
-            }
-            else
-            {
-                Console.WriteLine($"Файл не найден: {fullPath}");
-            }
-            Console.WriteLine();
-
-
-            Console.WriteLine("ДОМАШНЕЕ ЗАДАНИЕ 6.2 (LinkedList<LinkedList<int>>)");
-
-            var la = MakeLinkedMatrix(new[] { 1, 2 }, new[] { 3, 4 });
-            var lb = MakeLinkedMatrix(new[] { 5, 6 }, new[] { 7, 8 });
-
-            Console.WriteLine("Вывод матрицы А");
-            PrintMatrixLinked(la);
-            Console.WriteLine("Вывод матрицы Б");
-            PrintMatrixLinked(lb);
-
-            var lc = MultiplyMatrixLinked(la, lb);
-            Console.WriteLine("Результат умножения матриц:");
-            PrintMatrixLinked(lc);
-            Console.WriteLine();
-
-
-            Console.WriteLine("ДОМАШНЕЕ ЗАДАНИЕ 6.3 (Dictionary<string, int[]>)");
-
-            string[] monthNames = { "Январь", "Февраль", "Март", "Апрель", "Май",
-                                    "Июнь", "Июль", "Август", "Сентябрь", "Октябрь",
-                                    "Ноябрь", "Декабрь" };
-
-            var temperatureDict = new Dictionary<string, int[]>();
-            foreach (var name in monthNames)
-            {
-                int[] days = new int[30];
-                for (int d = 0; d < 30; d++)
-                    days[d] = rnd.Next(-20, 31);
-                temperatureDict[name] = days;
-            }
-
-            var avgDict = AverageByMonthDict(temperatureDict);
-            Console.WriteLine("Средние температуры по месяцам:");
-            foreach (var kv in avgDict)
-                Console.WriteLine($"{kv.Key}: {kv.Value:F2}");
-
-
-            var sortedAvg = avgDict.OrderBy(kv => kv.Value).ToList();
-            Console.WriteLine("\nОтсортированные средние температуры:");
-            foreach (var kv in sortedAvg)
-                Console.Write($"{kv.Key}: {kv.Value:F2}  ");
-            Console.WriteLine();
+            Console.WriteLine("\nНажмите любую клавишу для выхода...");
+            Console.ReadKey();
         }
     }
 }
